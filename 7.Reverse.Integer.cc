@@ -4,10 +4,13 @@
 #include <stdlib.h>
 
 int reverse(int x) {
+  if (x == std::numeric_limits<int>::min()) {
+    return 0;
+  }
   bool is_negative = x < 0;
   unsigned ux = x;
   if (is_negative) {
-    ux = -x;
+    ux = (~x) + 1;
   }
   int digit_len = 0;
   int factor = 1;
@@ -18,13 +21,18 @@ int reverse(int x) {
 
   ux = x;
   if (is_negative) {
-    ux = -x;
+    ux = (~x) + 1;
   }
+
+  if (digit_len > 9 && (ux % 10) > 2) {
+    return 0;
+  }
+
   unsigned ret = 0;
   factor = 10;
   for (int i = 0; i < digit_len; i++) {
-    unsigned tmp = ux % (factor) * pow(10, digit_len - 1 - i);
-    if (std::numeric_limits<int>::max() -  tmp < ret) {
+    unsigned tmp = ux % (factor)*pow(10, digit_len - 1 - i);
+    if (std::numeric_limits<int>::max() - ret < tmp) {
       return 0;
     }
     ret += ux % (factor)*pow(10, digit_len - 1 - i);
@@ -33,9 +41,6 @@ int reverse(int x) {
 
   if (is_negative) {
     ret *= -1;
-    if (ret < std::numeric_limits<int>::min()) {
-      return 0;
-    }
   } else {
     if (ret > 0x7fffffff) {
       return 0;
@@ -43,12 +48,6 @@ int reverse(int x) {
   }
 
   return ret;
-
-  // int iret = ret;
-  // if ((ret < 0 && !is_negative) || (ret >= 0 && is_negative)) {
-  //   return 0;
-  // }
-  // return (is_negative ? -1 : 1) * ret;
 }
 
 int main(int argc, char **argv) {
