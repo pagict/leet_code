@@ -5,7 +5,7 @@
 
 int reverse(int x) {
   bool is_negative = x < 0;
-  long long ux = x;
+  unsigned ux = x;
   if (is_negative) {
     ux = -x;
   }
@@ -20,9 +20,13 @@ int reverse(int x) {
   if (is_negative) {
     ux = -x;
   }
-  long long ret = 0;
+  unsigned ret = 0;
   factor = 10;
   for (int i = 0; i < digit_len; i++) {
+    unsigned tmp = ux % (factor) * pow(10, digit_len - 1 - i);
+    if (std::numeric_limits<int>::max() -  tmp < ret) {
+      return 0;
+    }
     ret += ux % (factor)*pow(10, digit_len - 1 - i);
     ux = ux / factor;
   }
@@ -73,5 +77,8 @@ int main(int argc, char **argv) {
   printf("reverse(%d) = %d\n", x, reverse(x));
 
   x = -2147483648;
+  printf("reverse(%d) = %d\n", x, reverse(x));
+
+  x = 1534236461;
   printf("reverse(%d) = %d\n", x, reverse(x));
 }
