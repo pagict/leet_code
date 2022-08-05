@@ -12,18 +12,24 @@ std::vector<std::vector<int>> threeSum(std::vector<int> &nums) {
 
   for (unsigned i = 0; i < nums.size(); ++i) {
     for (unsigned j = i + 1; j < nums.size(); ++j) {
-
-      int num1 = nums[i];
-      int num2 = nums[j];
-
-      auto min_idx = i;
-      if (num2 > num1) {
-        min_idx = j;
+      auto less_num_idx = i;
+      auto less_num = nums[i];
+      if (nums[i] > nums[j]) {
+        less_num_idx = j;
+        less_num = nums[j];
       }
 
-      auto &comb_list = sum_combinations[num1 + num2];
+      auto &comb_list = sum_combinations[nums[i] + nums[j]];
+      size_t k = 0;
+      for (k = 0; k < comb_list.size(); ++k) {
+        if (nums[comb_list[k].first] == less_num) {
+          break;
+        }
+      }
 
-      comb_list.push_back(std::make_pair(min_idx, i ^ j ^ min_idx));
+      if (k == comb_list.size() || comb_list.size() == 0) {
+        comb_list.push_back(std::make_pair(less_num_idx, i ^ j ^ less_num_idx));
+      }
     }
   }
 
@@ -36,11 +42,14 @@ std::vector<std::vector<int>> threeSum(std::vector<int> &nums) {
 
     const auto &combine_list = iter->second;
     for (unsigned j = 0; j < combine_list.size(); ++j) {
-      if (i != combine_list[j].first && i != combine_list[j].second) {
+
+      if (i != combine_list[j].second && i != combine_list[j].first &&
+          i < combine_list[j].first && i < combine_list[j].second) {
         tmp.clear();
+
         tmp.push_back(nums[i]);
         tmp.push_back(nums[combine_list[j].first]);
-        tmp.push_back(nums[combine_list[j].second]);
+        tmp.push_back(-(nums[i] + nums[combine_list[j].first]));
 
         ret.emplace_back(tmp);
       }
