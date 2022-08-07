@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -42,16 +43,25 @@ std::vector<std::vector<int>> threeSum(std::vector<int> &nums) {
 
     const auto &combine_list = iter->second;
     for (unsigned j = 0; j < combine_list.size(); ++j) {
-
-      if (i != combine_list[j].second && i != combine_list[j].first &&
-          i < combine_list[j].first && i < combine_list[j].second) {
+      auto first = combine_list[j].first;
+      auto second = combine_list[j].second;
+      if (i != second && i != first) {
         tmp.clear();
 
         tmp.push_back(nums[i]);
-        tmp.push_back(nums[combine_list[j].first]);
-        tmp.push_back(-(nums[i] + nums[combine_list[j].first]));
+        tmp.push_back(nums[first]);
+        tmp.push_back(-(nums[i] + nums[first]));
 
         ret.emplace_back(tmp);
+
+        sum_combinations.erase(-nums[first]);
+        sum_combinations.erase(-nums[second]);
+
+        auto new_iter = sum_combinations.find(-nums[i]);
+        if (new_iter == sum_combinations.end() ||
+            new_iter->second.size() == 0) {
+          break;
+        }
       }
     }
   }
@@ -84,4 +94,18 @@ int main(int argc, char **argv) {
   auto ret = threeSum(input);
 
   print(input, ret);
+
+  input = {0, 0, 0};
+  print(input, threeSum(input));
+
+  input = {-1, 0, 1, 2, -1, -4, 3, 4, 1, -3, -2, 7, 5};
+  print(input, threeSum(input));
+
+  input = {1, 2, -2, -1};
+  print(input, threeSum(input));
+
+  input = {-1, 0, 1, 2, -1, -4, -2, -3, 3, 0, 4};
+  // expect: [[-4,0,4],[-4,1,3],[-3,-1,4],[-3,0,3],[-3,1,2],
+  //          [-2,-1,3],[-2,0,2],[-1,-1,2],[-1,0,1]]
+  print(input, threeSum(input));
 }
