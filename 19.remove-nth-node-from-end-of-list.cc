@@ -11,31 +11,22 @@ struct ListNode {
 };
 
 ListNode *removeNthFromEnd(ListNode *head, int n) {
-  if (!head) {
+  if (!head || !n) {
     return nullptr;
   }
-  int len = 0;
-  auto node = head;
-  while (node) {
-    node = node->next;
-    ++len;
+  ListNode fake_head(0, head);
+  auto tail = head->next;
+  while (--n > 0) {
+    tail = tail->next;
   }
 
-  auto n_from_head = len - n;
-  int cnt = 0;
-  node = head;
-  ListNode *prev = nullptr;
-  while (node && cnt < n_from_head) {
-    prev = node;
-    node = node->next;
-    ++cnt;
+  auto prev = &fake_head;
+  while (tail) {
+    prev = prev->next;
+    tail = tail->next;
   }
-  if (!prev) {
-    head = head->next;
-  } else {
-    prev->next = node ? node->next : nullptr;
-  }
-  return head;
+  prev->next = prev->next->next;
+  return fake_head.next;
 }
 
 void print(ListNode *head) {
