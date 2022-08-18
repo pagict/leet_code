@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdio>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -18,46 +19,38 @@ public:
   std::vector<TreeNode *> findDuplicateSubtrees(TreeNode *root) {
     std::vector<TreeNode *> result;
 
-    std::unordered_map<TreeNode *, std::string> searched_path;
-    auto path = searchPath(root, searched_path);
-    searched_path[root] = path;
+    std::unordered_map<std::string, std::vector<TreeNode *>> searched_path;
+    searchPath(root, searched_path);
 
-    for (auto iter : searched_path) {
-      printf("[%d] %s\n", iter.first->val, iter.second.c_str());
+    for (const auto &iter : searched_path) {
+      if (iter.second.size() > 1) {
+        result.push_back(iter.second.front());
+      }
     }
 
     return result;
   }
 
-  std::string
-  searchPath(TreeNode *root,
-             std::unordered_map<TreeNode *, std::string> &searched) {
+  std::string searchPath(
+      TreeNode *root,
+      std::unordered_map<std::string, std::vector<TreeNode *>> &searched) {
+    std::string path;
     if (!root) {
       return "";
     }
     std::string left_path = " ";
     if (root->left) {
-      auto &cached_path = searched[root->left];
-
-      if (!cached_path.empty()) {
-        left_path = cached_path;
-      } else {
-        cached_path = searchPath(root->left, searched);
-        left_path = cached_path;
-      }
+      left_path = searchPath(root->left, searched);
     }
     std::string right_path = " ";
     if (root->right) {
-      auto &cached = searched[root->right];
-      if (!cached.empty()) {
-        right_path = cached;
-      } else {
-        cached = searchPath(root->right, searched);
-        right_path = cached;
-      }
+      right_path = searchPath(root->right, searched);
     }
-    return "(" + left_path + ")" + std::to_string(root->val) + "(" +
+
+    path = "(" + left_path + ")" + std::to_string(root->val) + "(" +
            right_path + ")";
+    searched[path].push_back(root);
+    return path;
   }
 };
 
