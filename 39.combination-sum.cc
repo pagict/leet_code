@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -26,6 +27,10 @@ combinationSumInternal(std::vector<int> &candidates, int target) {
     auto sub = combinationSumInternal(candidates, target - candi);
     for (auto &j : sub) {
       j.insert(std::upper_bound(j.begin(), j.end(), candi), candi);
+      if (std::any_of(ret.begin(), ret.end(),
+                      [j](const auto &r) { return r == j; })) {
+        continue;
+      }
       ret.push_back(j);
     }
   }
@@ -51,7 +56,7 @@ std::vector<std::vector<int>> combinationSum(std::vector<int> &candidates,
 }
 
 void print_combinations(const std::vector<std::vector<int>> &combs) {
-  printf("{");
+  printf("%lu{", combs.size());
   if (combs.empty()) {
     printf("}\n");
     return;
