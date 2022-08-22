@@ -34,7 +34,9 @@ combinationSumInternal(std::vector<int> &candidates, int target) {
 }
 
 using Hash = struct Hash {
-  unsigned operator()(const std::vector<int> &vect) const { return 0; }
+  std::size_t operator()(const std::vector<int> &vect) const {
+    return vect.size();
+  }
 };
 
 std::vector<std::vector<int>> combinationSum(std::vector<int> &candidates,
@@ -42,10 +44,9 @@ std::vector<std::vector<int>> combinationSum(std::vector<int> &candidates,
   std::vector<std::vector<int>> ret;
   std::sort(candidates.begin(), candidates.end());
   ret = combinationSumInternal(candidates, target);
-
-  std::sort(ret.begin(), ret.end(), [](const auto &vec1, const auto &vec2) {
-    return vec1.size() < vec2.size();
-  });
+  std::unordered_set<std::vector<int>, Hash> uniq(ret.begin(), ret.end(),
+                                                  ret.size(), Hash());
+  ret.assign(uniq.begin(), uniq.end());
   return ret;
 }
 
