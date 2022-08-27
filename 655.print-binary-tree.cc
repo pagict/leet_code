@@ -2,7 +2,6 @@
 #include <cstddef>
 #include <queue>
 #include <string>
-#include <sys/_types/_size_t.h>
 #include <unordered_map>
 #include <vector>
 
@@ -33,40 +32,20 @@ void paint(std::vector<std::vector<std::string>> &board, TreeNode *root,
   }
 }
 
+int dfsHeight(TreeNode *root) {
+  if (!root) {
+    return 0;
+  }
+  return 1 + std::max(dfsHeight(root->left), dfsHeight(root->right));
+}
+
 std::vector<std::vector<std::string>> printTree(TreeNode *root) {
   std::vector<std::vector<std::string>> ret;
   if (!root) {
     return {};
   }
-
-  std::vector<TreeNode *> level_q;
-  level_q.push_back(root);
-  auto level_cnt = 0;
-  auto height = 0;
-  auto max_at_level = std::pow(2, height) - 1;
-  while (!level_q.empty()) {
-    auto *p = level_q.front();
-    level_q.erase(level_q.begin());
-    if (level_cnt > max_at_level && p) {
-      ++height;
-      max_at_level = std::pow(2, height) - 1;
-      level_cnt = 0;
-    }
-    ++level_cnt;
-
-    if (p) {
-      level_q.push_back(p->left);
-      level_q.push_back(p->right);
-    }
-  }
-
-  if (level_cnt < 0) {
-    --height;
-  }
-
-  auto rows = height + 1;
+  auto rows = dfsHeight(root);
   auto cols = std::pow<int>(2, rows) - 1;
-  printf("=height %d, row %d, col %f\n", height, rows, cols);
   ret = std::vector<std::vector<std::string>>(
       rows, std::vector<std::string>(cols, ""));
 
@@ -94,22 +73,22 @@ int main(int argc, char **argv) {
       new TreeNode(
           4, new TreeNode(2),
           new TreeNode(5, nullptr, new TreeNode(7, nullptr, new TreeNode(8)))));
-  // print_btree(printTree(root));
+  print_btree(printTree(root));
 
-  // root = new TreeNode(1, new TreeNode(2, nullptr, new TreeNode(4)),
-  //                     new TreeNode(3));
-  // print_btree(printTree(root));
+  root = new TreeNode(1, new TreeNode(2, nullptr, new TreeNode(4)),
+                      new TreeNode(3));
+  print_btree(printTree(root));
 
-  // root = new TreeNode(1, new TreeNode(2), nullptr);
-  // print_btree(printTree(root));
+  root = new TreeNode(1, new TreeNode(2), nullptr);
+  print_btree(printTree(root));
 
-  // root = new TreeNode(
-  //     1, new TreeNode(2, new TreeNode(3, new TreeNode(4), nullptr), nullptr),
-  //     new TreeNode(5));
-  // print_btree(printTree(root));
+  root = new TreeNode(
+      1, new TreeNode(2, new TreeNode(3, new TreeNode(4), nullptr), nullptr),
+      new TreeNode(5));
+  print_btree(printTree(root));
 
-  // root = new TreeNode(1);
-  // print_btree(printTree(root));
+  root = new TreeNode(1);
+  print_btree(printTree(root));
 
   root = new TreeNode(
       3, nullptr,
