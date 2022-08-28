@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -13,7 +14,7 @@ using TreeNode = struct TreeNode {
 };
 
 int widthOfBinaryTree(TreeNode *root) {
-  printf("=====\n");
+  // printf("=====\n");
   if (!root) {
     return 0;
   }
@@ -23,16 +24,17 @@ int widthOfBinaryTree(TreeNode *root) {
   auto max_in_level = std::pow(2, height);
   auto level_cnt = 0;
 
-  auto max_width = 0;
+  auto max_width = 1;
 
-  while (!queue.empty()) {
-    auto *p = queue.front();
-    queue.erase(queue.begin());
+  while (!queue.empty() && valid_nodes) {
     while (level_cnt >= max_in_level) {
       level_cnt -= max_in_level;
       ++height;
       max_in_level = std::pow(2, height);
-      if (valid_nodes > 0 && !queue.empty()) {
+      auto width = 0;
+      if (valid_nodes == 1) {
+        width = 1;
+      } else if (valid_nodes > 0 && !queue.empty()) {
         auto i = 0u;
         for (; i < queue.size(); ++i) {
           if (queue[i])
@@ -43,14 +45,18 @@ int widthOfBinaryTree(TreeNode *root) {
           if (queue[j])
             break;
         }
-        auto width = j; // or j
-        if (width > max_width) {
-          max_width = width;
-        }
+        width = j + 1 - i;
+      }
+
+      if (width > max_width) {
+        max_width = width;
       }
     }
-    printf("num(%s) at height:%d, cnt:%u\n",
-           p ? std::to_string(p->val).c_str() : "null", height, level_cnt);
+    auto *p = queue.front();
+    queue.erase(queue.begin());
+
+    // printf("num(%s) at height:%d, cnt:%u\n",
+    //        p ? std::to_string(p->val).c_str() : "null", height, level_cnt);
     ++level_cnt;
 
     if (p) {
@@ -84,6 +90,9 @@ int main(int argc, char **argv) {
           new TreeNode(5, nullptr, new TreeNode(7, nullptr, new TreeNode(8)))));
   printf("max_width=%d\n", widthOfBinaryTree(root));
 
+  root = new TreeNode(1, nullptr, new TreeNode(3, new TreeNode(4), nullptr));
+  printf("max_width=%d\n", widthOfBinaryTree(root));
+
   root = new TreeNode(1, new TreeNode(2, nullptr, new TreeNode(4)),
                       new TreeNode(3));
   printf("max_width=%d\n", widthOfBinaryTree(root));
@@ -105,5 +114,26 @@ int main(int argc, char **argv) {
                    new TreeNode(10, nullptr,
                                 new TreeNode(15, nullptr, new TreeNode(45))),
                    nullptr));
+  printf("max_width=%d\n", widthOfBinaryTree(root));
+
+  root = new TreeNode(
+      1, new TreeNode(3, new TreeNode(5, new TreeNode(6), nullptr), nullptr),
+      new TreeNode(2, nullptr, new TreeNode(9, new TreeNode(7), nullptr)));
+  printf("max_width=%d\n", widthOfBinaryTree(root));
+
+  root = new TreeNode(1, new TreeNode(3, new TreeNode(5), nullptr),
+                      new TreeNode(2));
+  printf("max_width=%d\n", widthOfBinaryTree(root));
+
+  auto *left_child1 = new TreeNode(2, new TreeNode(2), nullptr);
+  auto *left_child2 = new TreeNode(2, new TreeNode(2), nullptr);
+  auto *right_child1 = new TreeNode(2, nullptr, new TreeNode(2));
+  auto *right_child2 = new TreeNode(2, nullptr, new TreeNode(2));
+  auto *two_left_grandsons = new TreeNode(2, left_child1, left_child2);
+  auto *two_right_grandsons = new TreeNode(2, right_child1, right_child2);
+  auto *tmp = new TreeNode(1, two_left_grandsons, two_right_grandsons);
+  root = new TreeNode(
+      1, new TreeNode(1, new TreeNode(1), new TreeNode(1, nullptr, tmp)),
+      new TreeNode(1, new TreeNode(1), new TreeNode(1)));
   printf("max_width=%d\n", widthOfBinaryTree(root));
 }
