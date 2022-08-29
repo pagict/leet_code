@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -13,70 +15,47 @@ using TreeNode = struct TreeNode {
       : val(x), left(left), right(right) {}
 };
 
+std::map<unsigned, std::vector<unsigned>> level_idx;
+
+void dfs(TreeNode *node, unsigned height, unsigned idx) {
+  if (!node) {
+    return;
+  }
+
+  level_idx[height].push_back(idx);
+  auto two_times = idx << 1;
+  if (node->left) {
+    dfs(node->left, height + 1, two_times);
+  }
+  if (node->right) {
+    dfs(node->right, height + 1, two_times + 1);
+  }
+}
+
+// Runtime: 21 ms, faster than 21.37% of C++ online submissions for Maximum
+// Width of Binary Tree. Memory Usage: 20 MB, less than 5.14% of C++ online
+// submissions for Maximum Width of Binary Tree.
+
 int widthOfBinaryTree(TreeNode *root) {
   // printf("=====\n");
   if (!root) {
     return 0;
   }
-  std::vector<TreeNode *> queue{root};
-  auto valid_nodes = 1u;
-  auto height = 0u;
-  auto max_in_level = std::pow(2, height);
-  auto level_cnt = 0;
-
-  auto max_width = 1;
-
-  while (!queue.empty() && valid_nodes) {
-    while (level_cnt >= max_in_level) {
-      level_cnt -= max_in_level;
-      ++height;
-      max_in_level = std::pow(2, height);
-      auto width = 0;
-      if (valid_nodes == 1) {
-        width = 1;
-      } else if (valid_nodes > 0 && !queue.empty()) {
-        auto i = 0u;
-        for (; i < queue.size(); ++i) {
-          if (queue[i])
-            break;
-        }
-        auto j = queue.size() - 1;
-        for (; j >= 0; --j) {
-          if (queue[j])
-            break;
-        }
-        width = j + 1 - i;
-      }
-
-      if (width > max_width) {
-        max_width = width;
-      }
+  level_idx.clear();
+  dfs(root, 0, 0);
+  auto max = 0;
+  for (auto &level_nodeidx : level_idx) {
+    auto &idx = level_nodeidx.second;
+    if (idx.empty()) {
+      continue;
     }
-    auto *p = queue.front();
-    queue.erase(queue.begin());
-
-    // printf("num(%s) at height:%d, cnt:%u\n",
-    //        p ? std::to_string(p->val).c_str() : "null", height, level_cnt);
-    ++level_cnt;
-
-    if (p) {
-      queue.push_back(p->left);
-      queue.push_back(p->right);
-      if (p->left) {
-        ++valid_nodes;
-      }
-      if (p->right) {
-        ++valid_nodes;
-      }
-      --valid_nodes;
-    } else {
-      if (valid_nodes) {
-        queue.push_back(nullptr);
-        queue.push_back(nullptr);
-      }
+    std::sort(idx.begin(), idx.end());
+    auto width = idx.back() - idx.front() + 1;
+    if (max < width) {
+      max = width;
     }
   }
-  return max_width;
+  return max;
 }
 
 int main(int argc, char **argv) {
