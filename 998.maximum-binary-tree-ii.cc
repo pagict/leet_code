@@ -87,10 +87,10 @@ int main() {
   root = new TreeNode(4, new TreeNode(1),
                       new TreeNode(3, new TreeNode(2), nullptr));
   val = 5;
-  LevelPrintTree(constructII(root, val));
+  LevelPrintTree(insertIntoMaxTree(root, val));
 
   root = new TreeNode(5, new TreeNode(2, nullptr, new TreeNode(1)),
                       new TreeNode(3));
   val = 4;
-  LevelPrintTree(constructII(root, val));
+  LevelPrintTree(insertIntoMaxTree(root, val));
 }
