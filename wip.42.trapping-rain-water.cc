@@ -2,53 +2,77 @@
 #include <iterator>
 #include <vector>
 
-int trapInRangeLeft(const std::vector<int> &heights,
-                    const std::vector<int>::const_iterator beg_iter,
-                    const std::vector<int>::const_iterator end_iter) {
+int trapInRange(const std::vector<int> &heights,
+                const std::vector<int>::const_iterator max_iter,
+                const std::vector<int>::const_iterator beg_iter,
+                const std::vector<int>::const_iterator end_iter) {
   if (beg_iter >= end_iter || end_iter >= heights.end()) {
     return 0;
   }
-  auto max_iter = std::max_element(beg_iter, end_iter);
-  auto top = *max_iter;
   auto res = 0;
-  for (auto iter = max_iter; iter != end_iter; ++iter) {
-    res += (top - *iter);
-  }
-
   if (std::distance(beg_iter, max_iter) > 1) {
-    res += trapInRangeLeft(heights, beg_iter, max_iter);
-  }
-  return res;
-}
+    auto left_max_iter = std::max_element(beg_iter, max_iter);
+    auto top = *left_max_iter;
+    for (auto iter = left_max_iter; iter != max_iter; ++iter) {
+      res += (top - *iter);
+    }
 
-int trapInRangeRight(const std::vector<int> &heights,
-                     const std::vector<int>::const_iterator beg_iter,
-                     const std::vector<int>::const_iterator end_iter) {
-  if (beg_iter >= end_iter || end_iter > heights.end()) {
-    return 0;
+    if (std::distance(beg_iter, left_max_iter) > 2) {
+      res += trapInRange(heights, left_max_iter, beg_iter, max_iter);
+    }
   }
-  auto rbeg_iter = std::vector<int>::const_reverse_iterator(end_iter);
-  auto rend_iter = std::vector<int>::const_reverse_iterator(beg_iter);
-  auto rmax_iter = std::max_element(rbeg_iter, rend_iter);
-  auto max_iter = std::prev(std::vector<int>::const_iterator(rmax_iter.base()));
-  auto top = *rmax_iter;
-  auto res = 0;
-  for (auto iter = beg_iter; iter != max_iter; ++iter) {
-    res += (top - *iter);
+  auto right_max_iter = std::max_element(std::next(max_iter), end_iter);
+  for (auto iter = std::next(max_iter); iter != right_max_iter; ++iter) {
+    res += (*right_max_iter - *iter);
+  }
+  if (std::distance(right_max_iter, end_iter) > 2) {
+    res += trapInRange(heights, const std::vector<int>::const_iterator max_iter,
+                       const std::vector<int>::const_iterator beg_iter,
+                       const std::vector<int>::const_iterator end_iter)
   }
 
-  if (std::distance(max_iter, end_iter) > 1) {
-    res += trapInRangeRight(heights, std::next(max_iter), end_iter);
-  }
   return res;
 }
 
 int trap(const std::vector<int> &height) {
   int res = 0;
+  enum Direction {
+    kClimb = 0,
+    kSlope = 1,
+    kHorizontal = 2
+  } direction = kHorizontal;
 
-  auto max_iter = std::max_element(height.begin(), height.end());
-  res += trapInRangeLeft(height, height.begin(), max_iter);
-  res += trapInRangeRight(height, std::next(max_iter), height.end());
+  auto prev_top_idx = 0u;
+  for (auto i = 1u; i < height.size(); ++i) {
+    auto d = (height[i] > height[i - 1]
+                  ? kClimb
+                  : (height[i] == height[i - 1] ? kHorizontal : kSlope));
+    switch (d) {
+    case kClimb: {
+      if (direction != d) {
+        direction = d;
+      }
+    } break;
+
+    case kSlope: {
+      if (direction != d) {
+        auto tmp_height = std::min(height[i - 1], height[prev_top_idx]);
+        for (auto j = prev_top_idx; j < i; ++j) {
+          if (height[j] >= tmp_height) {
+            continue;
+          }
+
+          res += (tmp_height - height[j]);
+        }
+
+        direction = d;
+        prev_top_idx = i - 1;
+      }
+    }
+    case kHorizontal:
+      break;
+    }
+  }
   return res;
 }
 
