@@ -17,9 +17,9 @@ void PrintList(ListNode *head) {
 
   while (head) {
     if (head->next) {
-      printf("%d->", head->val);
+      printf("[%d]->", head->val);
     } else {
-      printf("%d\n", head->val);
+      printf("[%d]\n", head->val);
     }
     head = head->next;
   }

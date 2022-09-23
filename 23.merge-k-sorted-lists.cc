@@ -1,49 +1,32 @@
 #include <vector>
 
-struct ListNode {
-  int val;
-  ListNode *next;
-  ListNode() : val(0), next(nullptr){};
-  ListNode(int x) : val(x), next(nullptr) {}
-  ListNode(int x, ListNode *next) : val(x), next(next) {}
-};
-ListNode *mergeKLists(std::vector<ListNode *> &lists) {
-  std::vector<ListNode *> tails(lists.size(), nullptr);
-  for (auto i = 0u; i < lists.size(); ++i) {
-    tails[i] = lists[i];
-  }
-  ListNode fake_head(0);
-  auto *m = &fake_head;
-  while (true) {
-    unsigned min_idx = -1;
-    int min = 99999;
-    for (auto i = 0u; i < tails.size(); ++i) {
-      if (tails[i] && tails[i]->val < min) {
-        min_idx = i;
-        min = tails[i]->val;
-      }
-    }
+#include "leetcode_common_struct.h"
 
-    if (min_idx == -1) {
-      break;
+// Runtime: 338 ms, faster than 15.77% of C++ online submissions for Merge k
+// Sorted Lists.
+// Memory Usage: 12.9 MB, less than 95.85% of C++ online submissions for Merge k
+// Sorted Lists.
+
+ListNode *mergeKLists(std::vector<ListNode *> &lists) {
+  if (lists.empty()) {
+    return nullptr;
+  }
+  auto *ret = lists[0];
+  ListNode fake_head(0, ret);
+  for (auto i = 1u; i < lists.size(); ++i) {
+    auto *p = &fake_head;
+    while (lists[i]) {
+      while (p->next && p->next->val < lists[i]->val) {
+        p = p->next;
+      }
+
+      auto *tmp = p->next;
+      p->next = lists[i];
+      lists[i] = lists[i]->next;
+      p->next->next = tmp;
     }
-    m->next = tails[min_idx];
-    m = m->next;
-    tails[min_idx] = tails[min_idx]->next;
   }
   return fake_head.next;
-}
-
-void print_list(ListNode *lst) {
-  auto *p = lst;
-  while (p) {
-    printf("[%d]", p->val);
-    if (p->next) {
-      printf("->");
-    }
-    p = p->next;
-  }
-  printf("\n");
 }
 
 int main(int argc, char **argv) {
@@ -51,8 +34,8 @@ int main(int argc, char **argv) {
   vec.push_back(new ListNode(
       -8,
       new ListNode(9, new ListNode(10, new ListNode(12, new ListNode(20))))));
-  //   vec.push_back(new ListNode(1, new ListNode(3)));
-  //   vec.push_back(new ListNode(2));
+  vec.push_back(new ListNode(1, new ListNode(3)));
+  vec.push_back(new ListNode(2, new ListNode(15)));
 
-  print_list(mergeKLists(vec));
+  PrintList(mergeKLists(vec));
 }
